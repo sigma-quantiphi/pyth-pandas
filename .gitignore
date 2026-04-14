@@ -12,3 +12,5 @@ docs/_build/
 .coverage
 htmlcov/
 *.ipynb_checkpoints
+.idea/
+.vscode/
