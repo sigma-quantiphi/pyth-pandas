@@ -16,7 +16,7 @@ import time
 import pandas as pd
 import pytest
 
-from pyth_pandas import ParsedFeedSchema, PythPandas
+from pyth_pandas import ParsedFeedSchema, PythAuthError, PythPandas
 
 pytestmark = pytest.mark.skipif(
     not os.getenv("PYTEST_LIVE"),
@@ -50,5 +50,10 @@ def test_fetch_latest_prices_live(live_client: PythPandas):
 
 def test_get_guardian_set_upgrade_live(live_client: PythPandas):
     # Returns SignedGuardianSetUpgrade dict or None — both are valid.
-    result = live_client.get_guardian_set_upgrade()
+    # The governance endpoint is entitled separately from price feeds; a
+    # price-feed-only token will get 403 here, which is expected.
+    try:
+        result = live_client.get_guardian_set_upgrade()
+    except PythAuthError as exc:
+        pytest.skip(f"Token not entitled for /guardian_set_upgrade: {exc}")
     assert result is None or "new_guardian_set_index" in result

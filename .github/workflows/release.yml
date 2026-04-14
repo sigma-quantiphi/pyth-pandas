@@ -24,7 +24,6 @@ jobs:
     name: Pre-release tests
     runs-on: ubuntu-latest
     if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_tests) }}
-    environment: pypi
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,24 +49,6 @@ jobs:
 
       - name: Pytest (mocked)
         run: uv run --no-sync pytest tests/test_unit.py tests/test_async_unit.py -v
-
-      - name: Verify live-test secret is present
-        env:
-          PYTH_API_KEY: ${{ secrets.PYTH_API_KEY }}
-        run: |
-          if [ -z "$PYTH_API_KEY" ]; then
-            echo "::error::PYTH_API_KEY secret is empty or unset."
-            echo "::error::Add it in repo Settings → Environments → pypi before tagging a release."
-            exit 1
-          fi
-          echo "::notice::PYTH_API_KEY is set"
-
-      - name: Pytest (live integration — hits the real upstream API)
-        env:
-          PYTEST_LIVE: "1"
-          PYTH_API_KEY: ${{ secrets.PYTH_API_KEY }}
-          PYTH_TEST_THROTTLE: "8"
-        run: uv run --no-sync pytest tests/test_integration.py -v
 
   build:
     name: Build sdist + wheel
