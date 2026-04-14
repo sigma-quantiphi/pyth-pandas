@@ -1,0 +1,89 @@
+[project]
+name = "pyth-pandas"
+version = "0.1.0"
+description = "pandas-style client for the Pyth Pro Router (Pyth Lazer) REST + WebSocket API"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "Apache-2.0"
+keywords = ["api-client", "pandas", "pyth", "lazer", "oracle", "price-feeds"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "cachetools>=5.3",
+    "httpx>=0.28",
+    "orjson>=3.10",
+    "pandas>=2.2",
+    "pandera>=0.22",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+ws = [
+    "websocket-client>=1.8",
+    "websockets>=13.0",
+]
+explorer = [
+    "streamlit>=1.30",
+    "plotly>=5.0",
+]
+mcp = [
+    "fastmcp>=2.0",
+    "tabulate>=0.9",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-httpx>=0.35",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.9",
+    "mypy>=1.11",
+    "pandas-stubs>=2.2",
+    "types-cachetools>=5.3",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+pyth-pandas-explore = "explorer.app:main"
+pyth-pandas-mcp = "pyth_pandas.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/OWNER/pyth-pandas"
+Documentation = "https://OWNER.github.io/pyth-pandas/"
+Issues = "https://github.com/OWNER/pyth-pandas/issues"
+
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["pyth_pandas*", "explorer*"]
+
+[tool.setuptools.package-data]
+pyth_pandas = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_ignores = true

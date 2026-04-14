@@ -1,0 +1,1251 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pyth Pro Router API",
+    "license": {
+      "name": "MIT OR Apache-2.0",
+      "identifier": "MIT OR Apache-2.0"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/v1/"
+    }
+  ],
+  "paths": {
+    "/guardian_set_upgrade": {
+      "get": {
+        "summary": "Get signed guardian set upgrade",
+        "description": "Returns the Wormhole Guardian Set Upgrade VAA body and a single ECDSA signature\nfrom this router's key. Active when both current and next guardian sets are present\nin state, indicating a guardian set upgrade is in progress.",
+        "operationId": "handle_guardian_set_upgrade",
+        "responses": {
+          "200": {
+            "description": "Signed guardian set upgrade data, or null if no upgrade is in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SignedGuardianSetUpgrade"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    },
+    "/latest_price": {
+      "post": {
+        "summary": "Fetch latest price",
+        "description": "Returns last available update for requested feeds.\n\nOutput format is the same as the format of WebSocket feed update.",
+        "operationId": "handle_fetch_latest_prices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LatestPriceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Latest feed data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonUpdate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request: invalid feed id or symbol, binary encoding requested, or too many feeds"
+          },
+          "403": {
+            "description": "Forbidden: access token not entitled for this request"
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    },
+    "/merkle/root/stream": {
+      "get": {
+        "operationId": "handle_merkle_root_websocket_connection",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedMerkleRoot"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    },
+    "/price": {
+      "post": {
+        "summary": "Fetch price at timestamp",
+        "description": "Returns updates of the feeds issued at a specific point in time.\n\nOutput format is the same as the format of WebSocket feed update.",
+        "operationId": "handle_fetch_prices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Historical feed updates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonUpdate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request: invalid feed id or symbol, binary encoding requested, or too many feeds"
+          },
+          "403": {
+            "description": "Forbidden: access token not entitled for this request"
+          },
+          "404": {
+            "description": "No updates found with the supplied parameters"
+          },
+          "429": {
+            "description": "Too many requests"
+          },
+          "503": {
+            "description": "Service unavailable: history service is not configured"
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    },
+    "/reduce_price": {
+      "post": {
+        "summary": "Reduce on-chain payload size",
+        "description": "This endpoint can be used to convert a Pyth Pro on-chain payload containing multiple feeds\nto a smaller payload containing only some of the feeds.\n\nBoth input payload format and output format are the same as the format of WebSocket feed update.",
+        "operationId": "handle_reduce_price",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReducePriceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reduced update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonUpdate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request: unable to verify provided payload"
+          },
+          "403": {
+            "description": "Forbidden: access token not entitled for this request"
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    },
+    "/stream": {
+      "get": {
+        "summary": "Open WebSocket feed update stream",
+        "description": "This is the WebSocket endpoint for streaming feed updates.\n\n`WsRequest` describes all possible messages a client can send to the server.\n`WsResponse` describes all possible messages the server sends to the client.\n\nAfter establishing the connection, send one or more `SubscribeRequest` messages\nto initiate your subscription.\n\nTo maintain uptime requirements, clients are required to maintain multiple\nconnections to at least two different endpoints provided by Pyth Pro.\n\nThe server will send WebSocket pings to the client and will disconnect the client\nif it doesn't respond with a pong. Additionally, to avoid delivering stale updates,\nthe connection will be dropped if the client does not consume the updates fast enough.",
+        "operationId": "handle_websocket_connection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChannelSchemaRepr": {
+        "type": "string",
+        "enum": [
+          "real_time",
+          "fixed_rate@50ms",
+          "fixed_rate@200ms",
+          "fixed_rate@1000ms"
+        ]
+      },
+      "DeliveryFormat": {
+        "type": "string",
+        "enum": [
+          "json",
+          "binary"
+        ]
+      },
+      "DurationUs": {
+        "type": "integer",
+        "format": "u-int64",
+        "description": "Non-negative duration with microsecond resolution.",
+        "minimum": 0
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Sent from the server if an internal error occured while serving data for an existing subscription,\nor a client request sent a bad request.",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Text of the error."
+          }
+        }
+      },
+      "Format": {
+        "type": "string",
+        "enum": [
+          "evm",
+          "solana",
+          "leEcdsa",
+          "leUnsigned"
+        ]
+      },
+      "InvalidFeedSubscriptionDetails": {
+        "type": "object",
+        "required": [
+          "unknownIds",
+          "unknownSymbols",
+          "unsupportedChannels",
+          "unstable"
+        ],
+        "properties": {
+          "notEntitled": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of price feed IDs that the API key is not entitled to access."
+          },
+          "unknownIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of price feed IDs that could not be found."
+          },
+          "unknownSymbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of price feed symbols that could not be found."
+          },
+          "unstable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of unstable price feed IDs. Unstable feeds are not available for subscription."
+          },
+          "unsupportedChannels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of price feed IDs that do not support the requested channel."
+          }
+        }
+      },
+      "JsonBinaryData": {
+        "type": "object",
+        "required": [
+          "encoding",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "Binary data encoded in base64 or hex, depending on the requested encoding."
+          },
+          "encoding": {
+            "$ref": "#/components/schemas/JsonBinaryEncoding",
+            "description": "Encoding of the data. It will be the same as `jsonBinaryEncoding` specified in the `SubscriptionRequest`."
+          }
+        }
+      },
+      "JsonBinaryEncoding": {
+        "type": "string",
+        "enum": [
+          "base64",
+          "hex"
+        ]
+      },
+      "JsonUpdate": {
+        "type": "object",
+        "properties": {
+          "evm": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonBinaryData",
+                "description": "Signed on-chain payload for EVM. Only present if `Evm` is present in `formats` in subscription params."
+              }
+            ]
+          },
+          "leEcdsa": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonBinaryData",
+                "description": "Signed binary payload for off-chain verification. Only present if `LeEcdsa` is present in `formats` in subscription params."
+              }
+            ]
+          },
+          "leUnsigned": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonBinaryData",
+                "description": "Unsigned binary payload. Only present if `LeUnsigned` is present in `formats` in subscription params."
+              }
+            ]
+          },
+          "parsed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ParsedPayload",
+                "description": "Parsed representation of the price update.\nPresent unless `parsed = false` is specified in subscription params."
+              }
+            ]
+          },
+          "solana": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonBinaryData",
+                "description": "Signed on-chain payload for Solana. Only present if `Solana` is present in `formats` in subscription params."
+              }
+            ]
+          }
+        }
+      },
+      "LatestPriceRequest": {
+        "$ref": "#/components/schemas/LatestPriceRequestRepr"
+      },
+      "LatestPriceRequestRepr": {
+        "type": "object",
+        "required": [
+          "properties",
+          "formats",
+          "channel"
+        ],
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelSchemaRepr",
+            "description": "Channel determines frequency of updates."
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            },
+            "description": "Requested formats of the payload."
+          },
+          "jsonBinaryEncoding": {
+            "$ref": "#/components/schemas/JsonBinaryEncoding"
+          },
+          "parsed": {
+            "type": "boolean",
+            "description": "If `true`, the response will contain a JSON object containing\nall data of the update."
+          },
+          "priceFeedIds": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of feed IDs.\nEither feed ids or symbols must be specified."
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedProperty"
+            },
+            "description": "List of feed properties the sender is interested in."
+          },
+          "symbols": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "List of feed symbols.\nEither feed ids or symbols must be specified."
+          }
+        },
+        "examples": [
+          {
+            "channel": "real_time",
+            "formats": [
+              "evm"
+            ],
+            "jsonBinaryEncoding": "hex",
+            "parsed": true,
+            "priceFeedIds": null,
+            "properties": [
+              "price",
+              "confidence"
+            ],
+            "symbols": [
+              "Crypto.BTC/USD"
+            ]
+          }
+        ]
+      },
+      "MarketSession": {
+        "type": "string",
+        "enum": [
+          "regular",
+          "preMarket",
+          "postMarket",
+          "overNight",
+          "closed"
+        ],
+        "example": "regular"
+      },
+      "ParsedFeedPayload": {
+        "type": "object",
+        "description": "Parsed representation of a feed update.",
+        "required": [
+          "priceFeedId"
+        ],
+        "properties": {
+          "bestAskPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Best ask price for this price feed. Only present if the `bestAskPrice` property was\nspecified in the `SubscriptionRequest` and this is a price feed and\nthe value is currently available for this price feed."
+          },
+          "bestBidPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Best bid price for this price feed. Only present if the `bestBidPrice` property\nwas specified in the `SubscriptionRequest` and this is a price feed and\nthe value is currently available for this price feed."
+          },
+          "confidence": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Price",
+                "description": "Confidence for this price feed. Only present if the `confidence` property was\nspecified in the `SubscriptionRequest` and this is a price feed and\nthe value is currently available for this price feed."
+              }
+            ]
+          },
+          "emaConfidence": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Price",
+                "description": "Exponential moving average of the confidence for this price feeds.\nOnly present if the `emaConfidence` property was specified\nin the `SubscriptionRequest`  and this is a price feed\nand the value is currently available for this price feed."
+              }
+            ]
+          },
+          "emaPrice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Exponential moving average of the main price for this price feeds.\nOnly present if the `emaPrice` property was specified\nin the `SubscriptionRequest`  and this is a price feed\nand the value is currently available for this price feed."
+          },
+          "exponent": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int16",
+            "description": "Exponent for this feed. Only present if the `exponent` property was specified\nin the `SubscriptionRequest`. Each decimal field provided by the feed (price, fundingRate, etc)\nreturns the mantissa of the value. The actual value can be calculated as\n`mantissa * 10^exponent`."
+          },
+          "feedUpdateTimestamp": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TimestampUs"
+              }
+            ]
+          },
+          "fundingRate": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Rate",
+                "description": "Perpetual future funding rate for this feed.\nOnly present if the `fundingRate` property was specified in the `SubscriptionRequest`\nand this is a funding rate feed\nand the value is currently available for this price feed."
+              }
+            ]
+          },
+          "fundingRateInterval": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DurationUs",
+                "description": "Duration, in microseconds, between consecutive funding rate updates for this price feed.\nOnly present if the `fundingRateInterval` property was requested in the `SubscriptionRequest`\nand this is a funding rate feed and the value is defined for that feed."
+              }
+            ]
+          },
+          "fundingTimestamp": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TimestampUs",
+                "description": "Most recent perpetual future funding rate timestamp for this feed.\nOnly present if the `fundingTimestamp` property was specified in the `SubscriptionRequest`\nand this is a funding rate feed\nand the value is currently available for this price feed."
+              }
+            ]
+          },
+          "marketSession": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MarketSession",
+                "description": "Market session for this price feed. Only present if the `marketSession` property was specified\nin the `SubscriptionRequest`."
+              }
+            ]
+          },
+          "price": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "For price feeds: main price. For funding rate feeds: funding price.\nOnly present if the `price` property was specified\nin the `SubscriptionRequest` and the value is currently available for this price feed."
+          },
+          "priceFeedId": {
+            "$ref": "#/components/schemas/PriceFeedId",
+            "description": "Feed ID."
+          },
+          "publisherCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "u-int16",
+            "description": "Number of publishers contributing to this feed update. Only present if the `publisherCount`\nproperty was specified in the `SubscriptionRequest`.",
+            "minimum": 0
+          }
+        }
+      },
+      "ParsedPayload": {
+        "type": "object",
+        "required": [
+          "timestampUs",
+          "priceFeeds"
+        ],
+        "properties": {
+          "priceFeeds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParsedFeedPayload"
+            },
+            "description": "Values of the update for each feed."
+          },
+          "timestampUs": {
+            "type": "string",
+            "description": "Unix timestamp associated with the update (with microsecond precision)."
+          }
+        }
+      },
+      "Price": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "PriceFeedId": {
+        "type": "integer",
+        "format": "u-int32",
+        "minimum": 0
+      },
+      "PriceFeedProperty": {
+        "type": "string",
+        "enum": [
+          "price",
+          "bestBidPrice",
+          "bestAskPrice",
+          "publisherCount",
+          "exponent",
+          "confidence",
+          "fundingRate",
+          "fundingTimestamp",
+          "fundingRateInterval",
+          "marketSession",
+          "emaPrice",
+          "emaConfidence",
+          "feedUpdateTimestamp"
+        ]
+      },
+      "PriceRequest": {
+        "$ref": "#/components/schemas/PriceRequestRepr"
+      },
+      "PriceRequestRepr": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "properties",
+          "formats",
+          "channel"
+        ],
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelSchemaRepr",
+            "description": "Channel determines frequency of updates."
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            },
+            "description": "Requested formats of the payload."
+          },
+          "jsonBinaryEncoding": {
+            "$ref": "#/components/schemas/JsonBinaryEncoding"
+          },
+          "parsed": {
+            "type": "boolean",
+            "description": "If `true`, the stream update will contain a JSON object containing\nall data of the update."
+          },
+          "priceFeedIds": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of feed IDs.\nEither feed ids or symbols must be specified."
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedProperty"
+            },
+            "description": "List of feed properties the sender is interested in."
+          },
+          "symbols": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "List of feed symbols.\nEither feed ids or symbols must be specified."
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/TimestampUs",
+            "description": "Requested timestamp of the update."
+          }
+        }
+      },
+      "Rate": {
+        "type": "integer",
+        "format": "int64"
+      },
+      "ReducePriceRequest": {
+        "type": "object",
+        "required": [
+          "payload",
+          "priceFeedIds"
+        ],
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/JsonUpdate",
+            "description": "Feed update previously received from WebSocket or from \"Fetch price\"\nor \"Fetch latest price\" endpoints."
+          },
+          "priceFeedIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of feeds that should be preserved in the output update."
+          }
+        }
+      },
+      "SignedGuardianSetUpgrade": {
+        "type": "object",
+        "required": [
+          "current_guardian_set_index",
+          "new_guardian_set_index",
+          "new_guardian_keys",
+          "body",
+          "signature"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "Hex-encoded serialized VAA body bytes (for downstream VAA assembly)",
+            "example": "0x1a2b3c..."
+          },
+          "current_guardian_set_index": {
+            "type": "integer",
+            "format": "u-int32",
+            "description": "Current guardian set index (the signing set)",
+            "minimum": 0
+          },
+          "new_guardian_keys": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "u-int8",
+                "minimum": 0
+              }
+            },
+            "description": "Hex-encoded new guardian keys (20 bytes each)"
+          },
+          "new_guardian_set_index": {
+            "type": "integer",
+            "format": "u-int32",
+            "description": "New guardian set index",
+            "minimum": 0
+          },
+          "signature": {
+            "type": "string",
+            "description": "Hex-encoded 65-byte ECDSA signature (r || s || v) over the body digest",
+            "example": "0x1a2b3c..."
+          }
+        }
+      },
+      "SignedMerkleRoot": {
+        "type": "object",
+        "required": [
+          "root",
+          "slot",
+          "timestamp",
+          "channel",
+          "signature",
+          "messages"
+        ],
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelSchemaRepr"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "00abcdef...",
+              "00123456..."
+            ]
+          },
+          "root": {
+            "type": "string",
+            "description": "Hex-encoded 20-byte Keccak160 merkle root",
+            "example": "0x1a2b3c..."
+          },
+          "signature": {
+            "type": "string",
+            "description": "Hex-encoded 65-byte ECDSA signature (r || s || v)",
+            "example": "0x1a2b3c..."
+          },
+          "slot": {
+            "$ref": "#/components/schemas/u64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "u-int32",
+            "minimum": 0
+          }
+        }
+      },
+      "StreamUpdatedResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JsonUpdate",
+            "description": "Content of the update."
+          },
+          {
+            "type": "object",
+            "required": [
+              "subscriptionId"
+            ],
+            "properties": {
+              "subscriptionId": {
+                "$ref": "#/components/schemas/SubscriptionId",
+                "description": "The value specified in the corresponding `SubscribeRequest`."
+              }
+            }
+          }
+        ],
+        "description": "Sent from the server when new data is available for an existing subscription\n(only if `delivery_format == Json`)."
+      },
+      "SubscribeRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubscriptionParams",
+            "description": "Properties of the new subscription."
+          },
+          {
+            "type": "object",
+            "required": [
+              "subscriptionId"
+            ],
+            "properties": {
+              "subscriptionId": {
+                "$ref": "#/components/schemas/SubscriptionId",
+                "description": "A number chosen by the client to identify the new subscription.\nThis identifier will be sent back in any responses related to this subscription."
+              }
+            }
+          }
+        ],
+        "description": "A subscription request.\n\nAfter a successful subscription, the server will respond with a `SubscribedResponse`\nor `SubscribedWithInvalidFeedIdsIgnoredResponse` message,\nfollowed by `StreamUpdatedResponse` messages.\nIf a subscription cannot be made, the server will respond with a `SubscriptionError`\nmessage containing the error message."
+      },
+      "SubscribedResponse": {
+        "type": "object",
+        "description": "Sent from the server when a subscription succeeded and all specified feeds were valid.",
+        "required": [
+          "subscriptionId"
+        ],
+        "properties": {
+          "subscriptionId": {
+            "$ref": "#/components/schemas/SubscriptionId"
+          }
+        }
+      },
+      "SubscribedWithInvalidFeedIdsIgnoredResponse": {
+        "type": "object",
+        "description": "Sent from the server when a subscription succeeded, but\nsome of the  specified feeds were invalid.",
+        "required": [
+          "subscriptionId",
+          "subscribedFeedIds",
+          "ignoredInvalidFeedIds"
+        ],
+        "properties": {
+          "ignoredInvalidFeedIds": {
+            "$ref": "#/components/schemas/InvalidFeedSubscriptionDetails",
+            "description": "Map of failed feed IDs categorized by failure reason."
+          },
+          "subscribedFeedIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "IDs of valid feeds included in the established subscription."
+          },
+          "subscriptionId": {
+            "$ref": "#/components/schemas/SubscriptionId",
+            "description": "The value specified in the corresponding `SubscribeRequest`."
+          }
+        }
+      },
+      "SubscriptionErrorResponse": {
+        "type": "object",
+        "description": "Sent from the server if the requested subscription or unsubscription request\ncould not be fulfilled.",
+        "required": [
+          "subscriptionId",
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Text of the error."
+          },
+          "subscriptionId": {
+            "$ref": "#/components/schemas/SubscriptionId",
+            "description": "The value specified in the corresponding `SubscribeRequest`."
+          }
+        }
+      },
+      "SubscriptionId": {
+        "type": "integer",
+        "format": "u-int64",
+        "minimum": 0
+      },
+      "SubscriptionParams": {
+        "$ref": "#/components/schemas/SubscriptionParamsRepr"
+      },
+      "SubscriptionParamsRepr": {
+        "type": "object",
+        "required": [
+          "properties",
+          "formats",
+          "channel"
+        ],
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelSchemaRepr",
+            "description": "Channel determines frequency of updates."
+          },
+          "deliveryFormat": {
+            "$ref": "#/components/schemas/DeliveryFormat",
+            "description": "If `json` is selected, the server will send price updates as JSON objects\n(the on-chain payload will be encoded according to the `jsonBinaryEncoding` property).\nIf `binary` is selected, the server will send price updates as binary messages."
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Format"
+            },
+            "description": "Requested formats of the payload.\nAs part of each feed update, the server will send on-chain payloads required\nto validate these price updates on the specified chains."
+          },
+          "ignoreInvalidFeeds": {
+            "type": "boolean",
+            "description": "If true, the subscription will ignore invalid feed IDs and subscribe to any valid feeds.\nOtherwise, the entire subscription will fail if any feed is invalid."
+          },
+          "jsonBinaryEncoding": {
+            "$ref": "#/components/schemas/JsonBinaryEncoding",
+            "description": "For `deliveryFormat == \"json\"`, the on-chain payload will be encoded using the specified encoding.\nThis option has no effect for  `deliveryFormat == \"binary\"`."
+          },
+          "parsed": {
+            "type": "boolean",
+            "description": "If `true`, the stream update will contain a `parsed` JSON field containing\nall data of the update."
+          },
+          "priceFeedIds": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedId"
+            },
+            "description": "List of feed IDs.\nEither feed ids or symbols must be specified."
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceFeedProperty"
+            },
+            "description": "List of feed properties the sender is interested in."
+          },
+          "symbols": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "List of feed symbols.\nEither feed ids or symbols must be specified."
+          }
+        }
+      },
+      "TimestampUs": {
+        "type": "integer",
+        "format": "u-int64",
+        "description": "Unix timestamp with microsecond resolution.",
+        "minimum": 0
+      },
+      "UnsubscribeRequest": {
+        "type": "object",
+        "description": "An unsubscription request.\n\nAfter a successful unsubscription, the server will respond with a `UnsubscribedResponse` message\nand stop sending `SubscriptionErrorResponse` messages for that subscription.\nIf the unsubscription cannot be made, the server will respond with a `SubscriptionError` message\ncontaining the error text.",
+        "required": [
+          "subscriptionId"
+        ],
+        "properties": {
+          "subscriptionId": {
+            "$ref": "#/components/schemas/SubscriptionId",
+            "description": "ID of the subscription that should be canceled."
+          }
+        }
+      },
+      "UnsubscribedResponse": {
+        "type": "object",
+        "description": "Notification of a successful unsubscription.",
+        "required": [
+          "subscriptionId"
+        ],
+        "properties": {
+          "subscriptionId": {
+            "$ref": "#/components/schemas/SubscriptionId",
+            "description": "The value specified in the corresponding `SubscribeRequest`."
+          }
+        }
+      },
+      "WsRequest": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscribeRequest"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "subscribe"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UnsubscribeRequest"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "unsubscribe"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "description": "A WebSocket JSON message sent from the client to the server."
+      },
+      "WsResponse": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ErrorResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "error"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscribedResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "subscribed"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscribedWithInvalidFeedIdsIgnoredResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "subscribedWithInvalidFeedIdsIgnored"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UnsubscribedResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "unsubscribed"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionErrorResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "subscriptionError"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StreamUpdatedResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "streamUpdated"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "description": "A WebSocket JSON message sent from the server to the client."
+      },
+      "u64": {
+        "type": "integer",
+        "format": "u-int64",
+        "minimum": 0
+      }
+    },
+    "securitySchemes": {
+      "access_token": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+pyth-pandas>=0.1.0
+matplotlib
+jupyterlab
+python-dotenv
