@@ -120,9 +120,7 @@ class AsyncPythWebSocketSession:
     async def unsubscribe(self, *, subscription_id: int) -> None:
         if self._ws is None:
             raise RuntimeError("Session not connected.")
-        await self._ws.send(
-            json.dumps({"type": "unsubscribe", "subscriptionId": subscription_id})
-        )
+        await self._ws.send(json.dumps({"type": "unsubscribe", "subscriptionId": subscription_id}))
 
     def __aiter__(self) -> AsyncPythWebSocketSession:
         return self
