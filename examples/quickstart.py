@@ -22,10 +22,7 @@ def main() -> None:
             properties=["price", "confidence", "exponent", "publisherCount"],
             formats=[],
         )
-        # Convert raw mantissa to a human-readable price.
-        # Cast to float — exponents are negative ints, and `int ** negative-int`
-        # raises in numpy/pandas. Float exponentiation handles it correctly.
-        df["humanPrice"] = df["price"].astype(float) * 10.0 ** df["exponent"].astype(float)
+        df["humanPrice"] = df["price"] * 10 ** df["exponent"]
         print(df[["priceFeedId", "humanPrice", "publisherCount"]])
         print("update timestamp (µs):", df.attrs.get("timestampUs"))
 

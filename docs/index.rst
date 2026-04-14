@@ -23,4 +23,4 @@ A pandas-style Python client for the Pyth Pro Router (Pyth Lazer) API.
 Try it on Binder:
 
 .. image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/sigma-quantiphi/pyth-pandas/HEAD?labpath=examples
+   :target: https://mybinder.org/v2/gh/sigma-quantiphi/pyth-pandas/main?labpath=notebooks%2F01_getting_started.ipynb

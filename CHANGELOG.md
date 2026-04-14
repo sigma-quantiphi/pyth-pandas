@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-04-14
+
+### Added
+- Jupyter notebooks under `notebooks/` demonstrating REST quickstart,
+  historical-price backfill + plotting, and WebSocket streaming. The Binder
+  badge now launches `01_getting_started.ipynb` directly.
+- PyPI / Python / Downloads / License / CI / Ruff / Docs badges in README.
+
+### Changed
+- `fetch_latest_prices` / `fetch_prices` / `reduce_price` cast the `exponent`
+  column to `Float64` so `10 ** df["exponent"]` works directly without hitting
+  numpy's "Integers to negative integer powers are not allowed" error.
+
 ## [0.1.0] — 2026-04-14
 
 ### Added
@@ -23,5 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Streamlit explorer (`explorer` extra).
 - Sphinx docs, Binder configuration, GitHub Actions for CI / docs / release.
 
-[Unreleased]: https://github.com/sigma-quantiphi/pyth-pandas/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sigma-quantiphi/pyth-pandas/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/sigma-quantiphi/pyth-pandas/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/sigma-quantiphi/pyth-pandas/releases/tag/v0.1.0

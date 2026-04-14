@@ -59,6 +59,11 @@ class PricesMixin:
         feeds = parsed.get("priceFeeds", []) if parsed else []
         df = pd.DataFrame(feeds)
         df = self.preprocess_dataframe(df)  # type: ignore[attr-defined]
+        # `exponent` is a (usually negative) int in the API; coerce to float so
+        # that `10 ** df["exponent"]` works without the "Integers to negative
+        # integer powers are not allowed" numpy error.
+        if "exponent" in df.columns:
+            df["exponent"] = df["exponent"].astype("Float64")
         df.attrs["timestampUs"] = parsed.get("timestampUs") if parsed else None
         for fmt in ("evm", "solana", "leEcdsa", "leUnsigned"):
             if isinstance(payload, dict) and payload.get(fmt) is not None:

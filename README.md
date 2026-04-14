@@ -9,7 +9,7 @@
 [![CI](https://github.com/sigma-quantiphi/pyth-pandas/actions/workflows/ci.yml/badge.svg)](https://github.com/sigma-quantiphi/pyth-pandas/actions/workflows/ci.yml)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Docs](https://img.shields.io/badge/docs-sphinx-blue)](https://sigma-quantiphi.github.io/pyth-pandas/)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sigma-quantiphi/pyth-pandas/HEAD?labpath=examples)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sigma-quantiphi/pyth-pandas/main?labpath=notebooks%2F01_getting_started.ipynb)
 
 Every list endpoint returns a `pandas.DataFrame`, every dict endpoint returns
 a `TypedDict`, and every shape is enforced by a `pandera` schema. Sync + async,
