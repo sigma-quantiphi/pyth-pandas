@@ -2,7 +2,7 @@
 
 > pandas-style client for the Pyth Pro Router (Pyth Lazer) REST + WebSocket API
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OWNER/pyth-pandas/HEAD?labpath=examples)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sigma-quantiphi/pyth-pandas/HEAD?labpath=examples)
 
 Every list endpoint returns a `pandas.DataFrame`, every dict endpoint returns
 a `TypedDict`, and every shape is enforced by a `pandera` schema. Sync + async,

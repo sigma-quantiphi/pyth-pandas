@@ -23,5 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Streamlit explorer (`explorer` extra).
 - Sphinx docs, Binder configuration, GitHub Actions for CI / docs / release.
 
-[Unreleased]: https://github.com/OWNER/pyth-pandas/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OWNER/pyth-pandas/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sigma-quantiphi/pyth-pandas/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sigma-quantiphi/pyth-pandas/releases/tag/v0.1.0

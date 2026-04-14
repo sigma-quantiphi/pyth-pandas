@@ -55,9 +55,9 @@ pyth-pandas-explore = "explorer.app:main"
 pyth-pandas-mcp = "pyth_pandas.mcp_server:main"
 
 [project.urls]
-Homepage = "https://github.com/OWNER/pyth-pandas"
-Documentation = "https://OWNER.github.io/pyth-pandas/"
-Issues = "https://github.com/OWNER/pyth-pandas/issues"
+Homepage = "https://github.com/sigma-quantiphi/pyth-pandas"
+Documentation = "https://sigma-quantiphi.github.io/pyth-pandas/"
+Issues = "https://github.com/sigma-quantiphi/pyth-pandas/issues"
 
 [build-system]
 requires = ["setuptools>=70"]
